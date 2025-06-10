@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  notion-ai-assistant:
+    build: .
+    container_name: notion-ai-assistant
+    restart: unless-stopped
+    environment:
+      # Environment from .env file
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=info
+      
+      # Slack configuration
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
+      
+      # OpenAI configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4}
+      
+      # Composio configuration
+      - COMPOSIO_API_KEY=${COMPOSIO_API_KEY}
+      
+      # Database configuration
+      - DATABASE_URL=sqlite:///data/production.db
+      
+      # Security configuration
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
+      - MAX_MESSAGE_LENGTH=${MAX_MESSAGE_LENGTH:-4000}
+      - ALLOWED_USERS=${ALLOWED_USERS:-}
+      - ALLOWED_CHANNELS=${ALLOWED_CHANNELS:-}
+    volumes:
+      - app_data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "3000:3000"
+      - "3001:3001"  # Health check port
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:3001/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+volumes:
+  app_data:
+    driver: local

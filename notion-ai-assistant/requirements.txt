@@ -1,0 +1,11 @@
+composio-agno
+openai
+agno[memory]
+slack-bolt
+python-dotenv
+
+# Production dependencies
+dataclasses>=0.6  # Python 3.6 compatibility
+typing_extensions>=3.7.4
+flask>=2.0.0  # For health check endpoint
+requests>=2.25.0  # For health check testing

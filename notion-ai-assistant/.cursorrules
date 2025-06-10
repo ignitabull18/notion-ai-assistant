@@ -1,0 +1,377 @@
+# Cursor Rules for Slack AI Agent Development
+
+## Project Context
+You are working on production-ready Slack AI agents built with the Agno framework. This directory contains established patterns for configuration, error handling, security, monitoring, and deployment that MUST be followed for all new agents.
+
+## Core Principles
+
+### 1. ALWAYS Follow Established Patterns
+- Reuse the production architecture from this reference implementation
+- Don't recreate utilities that already exist in utils/
+- Follow the directory structure and naming conventions
+- Use the same configuration management approach
+
+### 2. Production-First Development
+- Every agent must be production-ready from day one
+- Include proper error handling, logging, monitoring, and security
+- All code must handle failures gracefully with user-friendly messages
+- Implement health checks and metrics collection
+
+### 3. Security by Default
+- Validate all user inputs using utils/security.py patterns
+- Implement rate limiting for all user interactions
+- Use environment variables for all sensitive configuration
+- Never hardcode secrets or API keys
+
+## Code Standards
+
+### Configuration Management
+```python
+# ✅ ALWAYS DO: Use centralized config
+from config import get_config
+config = get_config()
+api_key = config.openai.api_key
+
+# ❌ NEVER DO: Hardcode or use os.environ directly
+api_key = "sk-hardcoded-key"  # FORBIDDEN
+api_key = os.environ.get("API_KEY")  # AVOID
+```
+
+### Error Handling
+```python
+# ✅ ALWAYS DO: Use structured error handling
+from utils.errors import error_handler
+try:
+    result = risky_operation()
+except Exception as e:
+    app_error = error_handler.handle_error(e, context={"operation": "name"})
+    say(f"❌ {app_error.user_message}")
+
+# ❌ NEVER DO: Let exceptions crash or show raw errors
+try:
+    result = risky_operation()
+except Exception as e:
+    say(f"Error: {str(e)}")  # FORBIDDEN - exposes internals
+```
+
+### Slack API Calls
+```python
+# ✅ ALWAYS DO: Use retry logic
+from utils.retry import api_retry
+
+@api_retry.retry
+def get_slack_data():
+    return client.conversations_history(channel=channel_id)
+
+# ❌ NEVER DO: Raw API calls without error handling
+history = client.conversations_history(channel=channel_id)  # FORBIDDEN
+```
+
+### Metrics and Monitoring
+```python
+# ✅ ALWAYS DO: Add metrics to important operations
+from utils.monitoring import metrics
+
+with metrics.timer("operation_name"):
+    metrics.increment("operation.started")
+    result = important_operation()
+    metrics.increment("operation.success")
+
+# ❌ NEVER DO: Skip monitoring for production code
+result = important_operation()  # MISSING METRICS
+```
+
+### Logging
+```python
+# ✅ ALWAYS DO: Use structured logging
+from utils.errors import error_handler
+logger = error_handler.logger
+logger.info("Operation completed", extra={"user_id": user_id, "result": "success"})
+
+# ❌ NEVER DO: Use print statements or basic logging
+print(f"User {user_id} completed operation")  # FORBIDDEN
+logging.info("Operation completed")  # INSUFFICIENT CONTEXT
+```
+
+## File Organization Rules
+
+### Directory Structure (MANDATORY)
+```
+new-agent/
+├── main.py                     # Production entry point
+├── config.py                   # Environment configuration
+├── listeners/
+│   ├── __init__.py            # Production app factory
+│   ├── assistant.py           # Main assistant logic
+│   └── [integration].py       # Specific integrations
+├── utils/                     # REUSE from existing agents
+├── Dockerfile                 # Production container
+├── docker-compose.yml         # Local deployment
+├── .env.example              # Environment template
+├── requirements.txt          # Dependencies
+├── docs/
+│   ├── development/
+│   │   ├── CLAUDE.md         # Development guide
+│   │   ├── WORKFLOW.md       # Agent creation workflow
+│   │   └── CHEATSHEET.md     # Quick reference
+│   └── *.md                  # User documentation
+├── DEPLOYMENT.md             # Production deployment
+└── .cursorrules              # These rules
+```
+
+### File Naming Conventions
+- Use snake_case for Python files: `user_management.py`
+- Use kebab-case for directories: `new-agent/`
+- Use UPPER_CASE for environment variables: `SLACK_BOT_TOKEN`
+- Prefix all custom exceptions with project context: `NotionAPIError`
+
+## Slack Integration Requirements
+
+### Required OAuth Scopes (Check Before Building)
+```
+app_mentions:read, channels:history, channels:join, chat:write,
+im:history, im:write, users:read, assistant:write
+```
+
+### Event Subscriptions (Verify in Slack App)
+```
+app_mention, message.channels, message.im, 
+assistant_thread_started, assistant_thread_context_changed
+```
+
+### Assistant Integration Pattern
+```python
+# ✅ ALWAYS DO: Follow this exact pattern
+@assistant.user_message
+def respond_in_assistant_thread(payload, context, say):
+    try:
+        with metrics.timer("assistant.user_message"):
+            user_message = payload["text"]
+            
+            if detect_integration_intent(user_message):
+                response = await process_with_agent(...)
+                formatted = format_agent_response(response)
+                say(blocks=formatted['blocks'])
+            else:
+                # Fallback to general LLM
+                pass
+                
+    except Exception as e:
+        app_error = error_handler.handle_error(e)
+        say(f"❌ {app_error.user_message}")
+```
+
+## Environment Variable Rules
+
+### Required for ALL Agents
+```bash
+# Slack (NEVER SKIP THESE)
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_APP_TOKEN=xapp-...
+SLACK_SIGNING_SECRET=...
+
+# Environment
+ENVIRONMENT=development|production
+DEBUG=true|false
+LOG_LEVEL=debug|info|warning|error
+
+# Security (ALWAYS INCLUDE)
+RATE_LIMIT_PER_MINUTE=60
+MAX_MESSAGE_LENGTH=4000
+```
+
+### Integration-Specific (Add as needed)
+```bash
+# OpenAI
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4
+
+# Composio
+COMPOSIO_API_KEY=...
+
+# Database
+DATABASE_URL=sqlite:///data/production.db
+```
+
+## Deployment Requirements
+
+### Health Check (MANDATORY)
+- Every agent MUST expose health endpoint on port 3001
+- Health checks MUST validate all external dependencies
+- Use the established health check pattern from utils/monitoring.py
+
+### Docker Configuration (REQUIRED)
+```dockerfile
+# ✅ ALWAYS INCLUDE: Health check in Dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:3001/health', timeout=5)" || exit 1
+
+# ✅ ALWAYS INCLUDE: Non-root user
+RUN adduser --disabled-password --gecos '' appuser
+USER appuser
+```
+
+## Testing Requirements
+
+### Required Test Files
+```
+tests/
+├── test_configuration.py     # Config validation
+├── test_security.py         # Security middleware
+├── test_health_checks.py    # Health endpoint
+├── test_assistant.py        # Main assistant logic
+└── test_[integration].py    # Integration-specific tests
+```
+
+### Test Patterns (MANDATORY)
+```python
+# ✅ ALWAYS DO: Mock external APIs
+@pytest.fixture
+def mock_slack_client():
+    with patch('slack_sdk.WebClient') as mock:
+        yield mock
+
+def test_assistant_response(mock_slack_client):
+    # Test logic here
+    pass
+
+# ✅ ALWAYS DO: Test error handling
+def test_error_handling():
+    with pytest.raises(CustomError):
+        failing_operation()
+```
+
+## Performance Rules
+
+### Circuit Breaker Usage (REQUIRED)
+```python
+# ✅ ALWAYS DO: Use circuit breakers for external APIs
+from utils.retry import with_circuit_breaker
+
+@with_circuit_breaker("openai")
+def call_openai_api():
+    return openai_client.completions.create(...)
+
+# ❌ NEVER DO: Raw external API calls
+response = openai_client.completions.create(...)  # MISSING PROTECTION
+```
+
+### Memory Management (ENFORCE)
+```python
+# ✅ ALWAYS DO: Use context managers for resources
+with metrics.timer("database_operation"):
+    with database.connection() as conn:
+        result = conn.execute(query)
+
+# ❌ NEVER DO: Leave resources unclosed
+conn = database.connection()
+result = conn.execute(query)  # MISSING CLEANUP
+```
+
+## Security Rules (NON-NEGOTIABLE)
+
+### Input Validation (ALWAYS REQUIRED)
+```python
+# ✅ ALWAYS DO: Validate all user inputs
+from utils.security import SecurityMiddleware
+security = SecurityMiddleware(...)
+
+validated = security.validate_request(
+    user_id=user_id,
+    channel_id=channel_id,
+    message=user_message
+)
+
+# ❌ NEVER DO: Process raw user input
+process_message(payload["text"])  # FORBIDDEN - not validated
+```
+
+### Secret Management (STRICT)
+```python
+# ✅ ALWAYS DO: Use config system
+api_key = config.integration.api_key
+
+# ❌ NEVER DO: Hardcode or log secrets
+api_key = "sk-1234567890abcdef"  # FORBIDDEN
+logger.info(f"Using API key: {api_key}")  # FORBIDDEN - logs secret
+```
+
+## Code Review Checklist
+
+Before submitting any code, verify:
+- [ ] Uses established error handling patterns
+- [ ] Includes proper metrics and logging
+- [ ] Has security validation for all inputs
+- [ ] Implements health checks
+- [ ] Follows the directory structure
+- [ ] Includes comprehensive tests
+- [ ] Has proper Docker configuration
+- [ ] Documents environment variables
+- [ ] Uses retry logic for external APIs
+- [ ] Implements circuit breakers
+
+## Common Anti-Patterns (FORBIDDEN)
+
+### ❌ Don't Recreate Utilities
+```python
+# FORBIDDEN: Creating new logging setup
+import logging
+logging.basicConfig(format='%(message)s')
+
+# CORRECT: Use existing logging utility
+from utils.errors import error_handler
+logger = error_handler.logger
+```
+
+### ❌ Don't Skip Error Handling
+```python
+# FORBIDDEN: Letting exceptions crash
+def handle_message(payload):
+    result = external_api_call()  # Can throw exceptions
+    return result
+
+# CORRECT: Structured error handling
+def handle_message(payload):
+    try:
+        result = external_api_call()
+        return result
+    except Exception as e:
+        app_error = error_handler.handle_error(e)
+        raise app_error
+```
+
+### ❌ Don't Use Raw Slack API
+```python
+# FORBIDDEN: Direct API calls without retry
+response = client.chat_postMessage(channel=channel, text=text)
+
+# CORRECT: Use retry wrapper
+@api_retry.retry
+def send_message():
+    return client.chat_postMessage(channel=channel, text=text)
+```
+
+### ❌ Don't Mix Sync/Async Incorrectly
+```python
+# FORBIDDEN: Calling async from sync without proper handling
+def sync_handler():
+    result = async_function()  # Will fail
+
+# CORRECT: Use asyncio.run()
+def sync_handler():
+    result = asyncio.run(async_function())
+```
+
+## When to Ask for Help
+
+Ask the developer for clarification when:
+- Implementing a new type of integration not covered in examples
+- Uncertain about security implications of a feature
+- Performance requirements are unclear
+- Deployment target has specific constraints not covered
+
+## Final Notes
+
+These rules ensure consistency, security, and maintainability across all Slack agents in this directory. They are based on lessons learned from production deployments and must be followed for all new development.
+
+Deviation from these patterns requires explicit approval and documentation of the reasoning.
