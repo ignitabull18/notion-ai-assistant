@@ -1,0 +1,111 @@
+{
+  "_metadata": {
+      "major_version": 1,
+      "minor_version": 1
+  },
+  "display_information": {
+      "name": "Slack AI Assistant",
+      "description": "Your intelligent Slack workspace assistant. Summarize channels, search conversations, create reminders, and analyze team activity with AI.",
+      "background_color": "#4A154B",
+      "long_description": "Slack AI Assistant enhances your workspace with powerful automation and intelligence:\n\n📊 Channel Summaries - Get instant AI-powered summaries of conversations\n🔍 Smart Search - Find anything across your workspace with context-aware search\n⏰ Intelligent Reminders - Create and manage reminders with natural language\n📅 Message Scheduling - Schedule messages for optimal delivery\n📈 Activity Analytics - Analyze team communication patterns\n💬 Conversation Memory - Maintains context across thread conversations\n\nDesigned to make your Slack workspace more productive and insightful."
+  },
+  "features": {
+      "app_home": {
+          "home_tab_enabled": true,
+          "messages_tab_enabled": true,
+          "messages_tab_read_only_enabled": false
+      },
+      "bot_user": {
+          "display_name": "Slack AI",
+          "always_online": true
+      },
+      "shortcuts": [
+          {
+              "name": "Run sample shortcut",
+              "type": "global",
+              "callback_id": "sample_shortcut_id",
+              "description": "Runs a sample shortcut"
+          }
+      ],
+      "slash_commands": [
+          {
+              "command": "/sample-command",
+              "description": "Runs a sample command",
+              "should_escape": false
+          },
+          {
+              "command": "/ai-summarize",
+              "description": "Summarize channel conversations",
+              "usage_hint": "[timeframe] - e.g., 'last week', 'today', '7 days'",
+              "should_escape": false
+          },
+          {
+              "command": "/ai-remind",
+              "description": "Create smart reminders",
+              "usage_hint": "[what] [when] - e.g., 'review PRs tomorrow at 2pm'",
+              "should_escape": false
+          },
+          {
+              "command": "/ai-search",
+              "description": "Search across Slack",
+              "usage_hint": "[query] - e.g., 'deployment issues from last month'",
+              "should_escape": false
+          },
+          {
+              "command": "/ai-schedule",
+              "description": "Schedule messages",
+              "usage_hint": "[message] at [time] - e.g., 'Daily standup at tomorrow 9am'",
+              "should_escape": false
+          },
+          {
+              "command": "/ai-analyze",
+              "description": "Analyze team activity",
+              "usage_hint": "[metric] - e.g., 'channel activity', 'response times'",
+              "should_escape": false
+          }
+      ]
+  },
+  "oauth_config": {
+      "scopes": {
+          "bot": [
+              "channels:history",
+              "channels:read",
+              "chat:write",
+              "chat:write.public",
+              "commands",
+              "groups:history",
+              "groups:read",
+              "im:history",
+              "im:read",
+              "mpim:history",
+              "mpim:read",
+              "users:read",
+              "reminders:write",
+              "reminders:read",
+              "chat:write.customize",
+              "assistant:write",
+              "files:write"
+          ]
+      }
+  },
+  "settings": {
+      "event_subscriptions": {
+          "bot_events": [
+              "app_home_opened",
+              "message.channels",
+              "message.groups",
+              "message.im",
+              "message.mpim",
+              "app_mention",
+              "assistant_thread_started",
+              "assistant_thread_context_changed"
+          ]
+      },
+      "interactivity": {
+          "is_enabled": true
+      },
+      "org_deploy_enabled": false,
+      "socket_mode_enabled": true,
+      "token_rotation_enabled": false
+  }
+}

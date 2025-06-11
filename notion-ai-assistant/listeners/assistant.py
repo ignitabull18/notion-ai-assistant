@@ -7,6 +7,7 @@ from slack_sdk.errors import SlackApiError
 
 from .llm_caller_litellm import call_llm
 from .agno_integration import process_with_agent, detect_notion_intent, format_agent_response
+from .ui_components import create_welcome_blocks, create_notion_status_blocks
 from utils.errors import error_handler, SlackAPIError
 from utils.monitoring import metrics
 from utils.retry import api_retry
@@ -27,7 +28,8 @@ def start_assistant_thread(
         with metrics.timer("assistant.thread_started"):
             metrics.increment("assistant.threads.started")
             
-            say("How can I help you?")
+            # Show welcome interface with quick actions
+            say(blocks=create_welcome_blocks())
 
             prompts: List[Dict[str, str]] = [
                 {
@@ -82,6 +84,9 @@ def respond_in_assistant_thread(
             
             user_message = payload["text"]
             set_status("is typing...")
+            
+            # Show initial thinking status
+            initial_msg = say(blocks=create_notion_status_blocks("thinking", "Processing your request..."))
 
             if user_message == "Can you generate a brief summary of the referred channel?":
                 # the logic here requires the additional bot scopes:
@@ -138,6 +143,9 @@ def respond_in_assistant_thread(
             # Check if this is a Notion-related request
             if detect_notion_intent(user_message):
                 with metrics.timer("assistant.notion_request"):
+                    # Update status to show we're working on Notion
+                    say(blocks=create_notion_status_blocks("working", "Accessing your Notion workspace..."))
+                    
                     # Use Agno agent for Notion operations
                     import asyncio
                     returned_message = asyncio.run(

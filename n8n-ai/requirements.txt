@@ -1,0 +1,26 @@
+# Core dependencies
+slack-bolt==1.20.1
+slack-sdk==3.33.4
+python-dotenv==1.0.0
+
+# Agno AI framework
+agno==0.1.0
+
+# OpenAI for LLM and vision
+openai==1.58.1
+
+# HTTP client for N8N API
+requests==2.32.3
+aiohttp==3.11.10
+
+# Data handling
+pydantic==2.10.3
+
+# Utilities
+python-dateutil==2.9.0.post0
+
+# Development
+pytest==8.3.4
+pytest-asyncio==0.24.0
+black==24.10.0
+pylint==3.3.2

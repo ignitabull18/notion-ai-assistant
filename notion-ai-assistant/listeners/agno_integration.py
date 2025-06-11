@@ -34,9 +34,9 @@ def get_or_create_agent(session_id: Optional[str] = None) -> Agent:
             raise ValueError("OPENAI_API_KEY or LITELLM_API_KEY required")
         
         model = OpenAIChat(
-            id="o4-mini",
+            id="o3",
             api_key=api_key,
-            max_completion_tokens=50000  # Use 50K of the 100K available output capacity
+            max_tokens=65536  # o3 has 200k context window, using 64k for output
         )
         
         # Create storage

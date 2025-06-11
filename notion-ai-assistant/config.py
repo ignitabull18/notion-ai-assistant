@@ -22,8 +22,8 @@ class DatabaseConfig:
 class OpenAIConfig:
     """OpenAI configuration"""
     api_key: str
-    model: str = "o4-mini"
-    max_completion_tokens: int = 50000
+    model: str = "o3"
+    max_completion_tokens: int = 65536
     timeout: int = 120
     max_retries: int = 3
     base_url: Optional[str] = None
@@ -134,8 +134,8 @@ class AppConfig:
         
         # OpenAI
         config.openai.api_key = os.getenv("OPENAI_API_KEY", "")
-        config.openai.model = os.getenv("OPENAI_MODEL", "o4-mini")
-        config.openai.max_completion_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "50000"))
+        config.openai.model = os.getenv("OPENAI_MODEL", "o3")
+        config.openai.max_completion_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "65536"))
         config.openai.base_url = os.getenv("OPENAI_BASE_URL")
         
         # Slack

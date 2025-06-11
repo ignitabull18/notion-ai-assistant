@@ -1,0 +1,15 @@
+slack-bolt==1.23.0
+slack-cli-hooks<1.0.0
+slack-sdk>=3.31.0
+composio-agno>=0.1.0
+agno>=0.1.0
+openai>=1.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+matplotlib>=3.7.0
+plotly>=5.15.0
+pandas>=2.0.0
+numpy>=1.24.0
+pytest==8.3.5
+flake8==7.2.0
+black==25.1.0

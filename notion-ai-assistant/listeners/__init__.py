@@ -1,5 +1,9 @@
 from .assistant import assistant
 from .delegate_to_agent import register_listeners as register_agent_listeners
+from .actions.notion_actions import register_action_handlers
+from .link_unfurling import register_notion_link_unfurling
+from .shortcuts import register as register_shortcuts
+from .commands import register as register_commands
 
 
 def register_listeners(app):
@@ -8,6 +12,18 @@ def register_listeners(app):
     
     # Register agent delegation handlers
     register_agent_listeners(app)
+    
+    # Register action handlers for interactive components
+    register_action_handlers(app)
+    
+    # Register link unfurling
+    register_notion_link_unfurling(app, app.client)
+    
+    # Register shortcuts
+    register_shortcuts(app)
+    
+    # Register commands
+    register_commands(app)
 
     # The following event listeners demonstrate how to implement the same on your own.
     # from listeners import events
