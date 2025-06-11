@@ -49,8 +49,7 @@ def main():
     tests = [
         ("tests/test_composio.py", "Testing Composio Connection"),
         ("tests/test_all_notion_actions.py", "Testing All 20 Notion Actions"),
-        ("tests/test_slack_assistant.py", "Testing Slack Assistant Features"),
-        ("tests/check_actions.py", "Checking Available Actions"),
+        ("scripts/checks/check_actions.py", "Checking Available Actions"),
     ]
     
     passed = 0

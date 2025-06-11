@@ -9,34 +9,23 @@ Welcome to the Notion AI Assistant documentation. This directory contains compre
 - **[ASSISTANT_PROFILE.md](ASSISTANT_PROFILE.md)** - Complete profile and capabilities of the Notion AI Assistant
 - **[APP_LISTING.md](APP_LISTING.md)** - Official app listing description for the Slack App Directory
 
-### Development Documentation
-- **[development/CLAUDE.md](development/CLAUDE.md)** - Comprehensive development guide with lessons learned and best practices
-- **[development/WORKFLOW.md](development/WORKFLOW.md)** - Step-by-step workflow for creating new Slack agents
-- **[development/CHEATSHEET.md](development/CHEATSHEET.md)** - Quick reference for common patterns and commands
-
 ### Technical Notes
-- **[CLAUDE.md](CLAUDE.md)** - Original technical notes about this specific Notion integration
+- **[CLAUDE.md](CLAUDE.md)** - Technical notes and development guidance for this Notion integration
 
 ## 🗂️ Documentation Organization
 
 ### This Directory (`/notion-ai-assistant/docs/`)
-**Purpose**: Agent-specific documentation
+**Purpose**: Notion AI Assistant documentation
 - User guides and onboarding
-- Feature documentation
+- Feature documentation  
 - Marketing materials
-- Development guides for creating similar agents
-
-### Parent Directory (`/agno/docs/`)
-**Purpose**: General Slack app development resources
-- Slack app setup guides
-- Architecture documentation
-- Platform-specific guides (LiteLLM, Bolt, etc.)
+- Technical notes
 
 ### Root Directory (`/notion-ai-assistant/`)
 **Purpose**: Configuration and deployment
-- `.cursorrules` - Development standards enforcement
 - `DEPLOYMENT.md` - Production deployment guide
 - Configuration files (Dockerfile, docker-compose.yml)
+- Main application code
 
 ## 🚀 Quick Links
 
@@ -45,10 +34,8 @@ Welcome to the Notion AI Assistant documentation. This directory contains compre
 - [Features & Capabilities](ASSISTANT_PROFILE.md)
 
 ### For Developers
-- [Development Guide](development/CLAUDE.md)
-- [Creating New Agents](development/WORKFLOW.md)
-- [Quick Reference](development/CHEATSHEET.md)
-- [Development Standards](../.cursorrules)
+- [Development Guide](../CLAUDE.md)
+- [Technical Documentation](CLAUDE.md)
 
 ### For Operators
 - [Deployment Guide](../DEPLOYMENT.md)

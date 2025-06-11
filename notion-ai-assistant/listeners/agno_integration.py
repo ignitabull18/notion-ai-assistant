@@ -172,7 +172,7 @@ RESPONSE FORMATTING:
 - Include relevant emojis (📊 for databases, 📄 for pages, etc.)
 
 Remember: You're not just executing commands - you're a strategic partner helping users build better, more organized, and more productive Notion workspaces.""",
-            session_id=session_id or "slack-assistant",
+            session_id=session_id or "notion-assistant",
             enable_user_memories=True,  # Enable user memory creation
             enable_session_summaries=True,  # Enable session summaries
             add_history_to_messages=True,  # Add conversation history
